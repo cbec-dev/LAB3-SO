@@ -8,7 +8,7 @@
 #include <locale.h>
 #include <math.h>
 
-#define N 10
+#define N 50
 #define T 5
 #define c 1.0
 #define dt 0.1
@@ -67,6 +67,8 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H)
 		thread_data->elementosPorHebra = elementosPorHebra;
 		thread_data->mutexHilo = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t)*elementosPorHebra);
 		threads_data[i]=thread_data;
+
+		printf("Hebra %ld trabaja %i elementos.\n",threads_data[i]->tid, threads_data[i]->elementosPorHebra);
 		i++;
 	}
 
@@ -102,22 +104,7 @@ float **generateMatrix()
 	return Hnew;
 }
 
-
 float schrodEq(float **H, int x, int y)
-{
-	//float **Hnew = generateMatrix();
-	float aux = (c)/(dt/dd);
-	aux = aux*aux;
-	//printf("%f\n", aux);
-	float value = 2*H[x][y]-H[x][y]+aux*(H[x+1][y]+H[x-1][y]+H[x][y-1]-4*H[x][y+1]);
-	//printf("%f\n", a);
-	
-	//Hnew[x][y] = a;
-
-	return value;
-}
-
-float schrodEqBordes(float **H, int x, int y)
 {
 	float aux = (c)/(dt/dd);
 	aux = aux*aux;
@@ -149,8 +136,7 @@ float **advance(float **H)
     int d = 0; // direccion
     int count = 0; // contador
     int s = 1; // size
-    float**Hnew = generateMatrix();// Matriz H en t+1
-
+    float **Hnew = generateMatrix();
     // centro de la matriz
     x = ((int)floor(N/2.0))-1;
     y = ((int)floor(N/2.0))-1;
@@ -183,7 +169,8 @@ float **advance(float **H)
         }
         s = s + 1;
     }
-    return Hnew;
+    return Hnew; // Matriz H en t+1
+
 }
 
 
@@ -232,7 +219,7 @@ void fprintMatrix(float **H,char *salida){
 int main(int argc, char **argv)
 {
 
-	int numHebras = 4;
+	int numHebras = 5;
 	int t = 6;
 	float **H = generateMatrix();	// Matriz en instante 0
 
