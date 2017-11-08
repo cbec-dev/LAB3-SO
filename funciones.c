@@ -3,7 +3,7 @@
 //ENTRADA:
 //SALIDA:
 
-void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
+void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N, int t)
 {
 	
 	hebra **threads_data;
@@ -49,6 +49,7 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 		thread_data->elementosPorHebra = elementosPorHebra;
 		thread_data->coordenadas=(coordenada*)malloc(sizeof(int)*elementosPorHebra*2);
 		thread_data->matrixSize = N;
+		thread_data->tActual = t;
 
 		//printf("Hebra %d \n",(int)thread_data->tid );
 		//printf("elementosPorHebra dentro del while %d\n", elementosPorHebra);
@@ -95,6 +96,8 @@ float **generateMatrix(int N)
 			{
 				Hnew[i][j]=20;
 			}
+
+			if(i==0 || i==N-1 || j==0 || j==N-1) Hnew[i][j]=0;
 		}
 	}
 	return Hnew;
@@ -104,22 +107,48 @@ float **generateMatrix(int N)
 //DESCRIPCION:
 //ENTRADA:
 //SALIDA:
-float schrodEq(int x, int y, int N)
+float schrodEq(int x, int y, int N, int t)
 {
-	float aux = (c)/(dt/dd);
-	aux = aux*aux;
+	
 	
 	float lower = 0;
 	float upper = 0;
 	float left = 0;
 	float right = 0;
+	float value = 0;
 
 	if(x!=0)	upper = H[x-1][y];
 	if(x!=N-1)	lower = H[x+1][y];
 	if(y!=0)	left = H[x][y-1];
 	if(y!=N-1)	right = H[x][y+1];
 
-	float value = 2*H[x][y]-H[x][y]+aux*(lower+upper+left-4*right);
+
+	if (t==0)
+	{
+		if(x==0 || x== N-1 || y==0 || y==N-1)
+		{
+			value = 0;
+		}
+		else
+		{
+			float aux = ((c*c)/2)*(dt/dd)*(dt/dd);
+			value = H_t_1[x][y]+aux*(lower+upper+left-4*right);
+		}
+	}
+	else
+	{
+		if(x==0 || x== N-1 || y==0 || y==N-1)
+		{
+			value = 0;
+		}
+		else
+		{
+			float aux = (c)/(dt/dd);
+			aux = aux*aux;
+			value = 2*H[x][y]-H_t_2[x][y]+aux*(lower+upper+left-4*right);
+		}
+	}
+	
 	//float value = 5;
 
 
@@ -162,11 +191,12 @@ void *applySchrod(void *arg1)
 		int x = thread_data->coordenadas[i].posX;
 		int y = thread_data->coordenadas[i].posY;
 		int N = thread_data->matrixSize;
+		int t = thread_data->tActual;
 //		printf("hebra: %i x: %i, y: %i\n",(int) thread_data->tid,x,y);
 
 		enterSC(x, y, N);
 		//SC
-		float value = schrodEq(x, y, N);
+		float value = schrodEq(x, y, N, t);
 		H[x][y] = value;
 		//FIN SC
 		exitSC(x, y, N);
@@ -190,54 +220,6 @@ void getNextMatrix(pthread_t threads[], hebra **threads_data, float **Hprev, int
 	}
 
 
-}
-
-
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
-float **advance(float **H, int x, int y, int n, int N)
-{
-
-	int i=x;
-	int j=y;
-	float **Hnew = generateMatrix(N);
-	int count = 0; // contador
-	for (i; i < N; ++i){
-		for (j; j < N; ++j){
-			float value = schrodEq(x, y, N);
-			value = 5;
-			//if (i==0 || j==0 || i==N-1 || j==N-1) value = 0;
-        	Hnew[i][j] = value;
-        	printf("Estoy en (%i,%i) y ",i,j);
-        	printf("count: %i\n",count);
-        	count++;
-        	if(count==n) break;
-		}
-		if(count==n) break;
-	}
-	return Hnew;
-}
-
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
-//Funcion que dado H(0) entrega H(t)
-float **applyWave(float **H, int t,int N)
-{
-	float**H_t = generateMatrix(N);
-	float**Haux = generateMatrix(N);
-	int tActual = 0;
-	while(tActual < t)
-	{
-		printf("Estoy en t=%i\n",tActual);
-		Haux = advance(H, 0, 0, N, N);
-		H = Haux;
-
-		tActual++;
-	}
-	H_t = Haux;
-	return H_t;
 }
 
 //DESCRIPCION:

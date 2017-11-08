@@ -5,7 +5,8 @@
 #define dd 2.0
 pthread_mutex_t **mutex;	//Inicialización mutex
 float **H;	// Matriz en instante t
-float **Hnext;	// Matriz en instante t+1
+float **H_t_2;
+float **H_t_1;
 
 typedef struct{
 
@@ -23,13 +24,14 @@ typedef struct {
      int 				elementosPorHebra;
      coordenada			*coordenadas;
      int 				matrixSize;
+     int 				tActual;
 }hebra;
 
 
 //DECLARACION DE FUNCIONES
-void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N);
+void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N, int t);
 float **generateMatrix(int N);
-float schrodEq(int x, int y,int N);
+float schrodEq(int x, int y,int N, int t);
 float **advance(float **H, int x, int y, int n, int N);
 float **applyWave(float **H, int t,int N);
 void printMatrix(float **H,int N);
