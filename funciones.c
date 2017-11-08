@@ -42,14 +42,12 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 	//ASIGNAR LAS CASILLAS A LAS HEBRAS
 	while(i < numeroHebras)
 	{
-		
 		hebra *thread_data;
 		thread_data = malloc(sizeof(hebra));
 		thread_data->tid = i;
 		if(impar==1 && i==(numeroHebras-1)) elementosPorHebra = elementosUltimaHebra;
 		thread_data->elementosPorHebra = elementosPorHebra;
-		thread_data->coordenadas=(coordenada*)malloc(sizeof(char)*elementosPorHebra);
-		thread_data->mutexHilo = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t)*elementosPorHebra);
+		thread_data->coordenadas=(coordenada*)malloc(sizeof(int)*elementosPorHebra*2);
 		thread_data->matrixSize = N;
 
 		//printf("Hebra %d \n",(int)thread_data->tid );
@@ -61,7 +59,7 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 			{
 				thread_data->coordenadas[j].posX=fila;
 				thread_data->coordenadas[j].posY=columna;
-				printf("%d) posX: %d posY: %d\n",j,thread_data->coordenadas[j].posX,thread_data->coordenadas[j].posY);
+				//printf("%d) posX: %d posY: %d\n",j,thread_data->coordenadas[j].posX,thread_data->coordenadas[j].posY);
 				columna++;
 			}
 			else{
@@ -70,11 +68,9 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 				fila++;
 			}
 		}
-		thread_data->mutexHilo = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t)*elementosPorHebra);
 		threads_data[i]=thread_data;
 		i++;
 	}
-
 	getNextMatrix(threads, threads_data,H, numeroHebras, N);
 }
 
@@ -157,8 +153,8 @@ void *applySchrod(void *arg1)
 {
 	hebra *thread_data = (hebra *) arg1;
 
-	printf("Soy la hebra %i", (int) thread_data->tid);
-	printf(", tengo %i coordenadas\n", thread_data->elementosPorHebra);
+//	printf("Soy la hebra %i", (int) thread_data->tid);
+//	printf(", tengo %i coordenadas\n", thread_data->elementosPorHebra);
 
 	int i = 0;
 	while(i<thread_data->elementosPorHebra)
@@ -166,7 +162,7 @@ void *applySchrod(void *arg1)
 		int x = thread_data->coordenadas[i].posX;
 		int y = thread_data->coordenadas[i].posY;
 		int N = thread_data->matrixSize;
-		printf("hebra: %i x: %i, y: %i\n",(int) thread_data->tid,x,y);
+//		printf("hebra: %i x: %i, y: %i\n",(int) thread_data->tid,x,y);
 
 		enterSC(x, y, N);
 		//SC

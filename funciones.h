@@ -21,7 +21,6 @@ typedef struct{
 typedef struct {
      pthread_t 			tid;
      int 				elementosPorHebra;
-     pthread_mutex_t	*mutexHilo;
      coordenada			*coordenadas;
      int 				matrixSize;
 }hebra;

@@ -76,12 +76,12 @@ int main(int argc, char **argv)
 		//El hilo main espera que terminen las hebras
 		waitHebras(threads, numeroHebras);
 
-		printMatrix(H, N);
+	//	printMatrix(H, N);
 	
 		tActual++;
 	}
 
-	printMatrix(H, N);
+	//printMatrix(H, N);
 	fprintMatrix(H, "out.raw", N);
 
 	return 0;
