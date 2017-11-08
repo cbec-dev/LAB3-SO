@@ -13,7 +13,71 @@
 #define c 1.0
 #define dt 0.1
 #define dd 2.0
+pthread_mutex_t **mutex;	//Inicialización mutex
 
+typedef struct{
+
+	float value;
+}elemento;
+
+typedef struct {
+     pthread_t 			tid;
+     int 				elementosPorHebra;
+     pthread_mutex_t	*mutexHilo;
+}hebra;
+
+
+void crearHebras(pthread_t threads[], int numeroHebras, float **H)
+{
+	
+	hebra **threads_data;
+	threads_data = malloc(sizeof(hebra)*numeroHebras);
+	int i = 0;
+	int impar=0;
+	int elementosPorHebra=0;
+	int elementosUltimaHebra;
+	int cantidadElementos=N*N;
+	
+	//Asignación memoria mutex global
+	mutex=(pthread_mutex_t **)malloc(sizeof(pthread_mutex_t*)*N);
+	for (int i = 0; i <N; ++i){
+		mutex[i]=(pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)*N);
+		for (int j = 0; j < N; ++j){
+
+			pthread_mutex_init(&mutex[i][j], NULL);			
+		}
+	}
+	//Todas las hebras trabajan la misma cantidad de elementos
+	if (cantidadElementos%numeroHebras==0){
+		elementosPorHebra=cantidadElementos/numeroHebras;
+	}
+	//Las hebras trabajan cantidades distintas
+	else{
+		impar=1;
+		elementosPorHebra=cantidadElementos/numeroHebras;
+		elementosUltimaHebra = elementosPorHebra + cantidadElementos%numeroHebras;
+	}
+
+	while(i < numeroHebras)
+	{
+		hebra *thread_data;
+		thread_data = malloc(sizeof(hebra));
+		thread_data->tid = i;
+		if(i==numeroHebras) elementosPorHebra = elementosUltimaHebra;
+		thread_data->elementosPorHebra = elementosPorHebra;
+		thread_data->mutexHilo = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t)*elementosPorHebra);
+		threads_data[i]=thread_data;
+		i++;
+	}
+
+	i = 0;
+	while(i < numeroHebras)
+	{
+		//pthread_create(&threads[i], NULL, ubicar, (void *) threads_data[i]);
+		i++;
+	}
+
+}
 
 float **generateMatrix()
 {
@@ -168,13 +232,20 @@ void fprintMatrix(float **H,char *salida){
 int main(int argc, char **argv)
 {
 
-
+	int numHebras = 4;
+	int t = 6;
 	float **H = generateMatrix();	// Matriz en instante 0
+
+	//Se crean las hebras
+	pthread_t threads[numHebras];
+	crearHebras(threads, numHebras, H);
+
+
+	
 	printMatrix(H);
-	int t = 3;
 	float **Hnew = applyWave(H, t);		//Matriz en instante t
 	printMatrix(Hnew);
-	fprintMatrix(Hnew, "out3.raw");
+	fprintMatrix(Hnew, "out.raw");
 
 
 
