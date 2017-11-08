@@ -8,7 +8,7 @@
 #include <locale.h>
 #include <math.h>
 
-#define N 50
+#define N 10
 #define T 5
 #define c 1.0
 #define dt 0.1
@@ -99,6 +99,9 @@ float **generateMatrix()
 			{
 				Hnew[i][j]=20;
 			}
+
+			if(i==0 || i==N-1)	Hnew[i][j]=0;
+			if(j==0 || j==N-1)	Hnew[i][j]=0;
 		}
 	}
 	return Hnew;
@@ -205,7 +208,7 @@ void printMatrix(float **H)
 }
 
 void fprintMatrix(float **H,char *salida){
-	int i,j;
+	int i;
 	if (salida !=NULL){
 		FILE *archivoSalida;
 		archivoSalida=fopen(salida,"wb");
