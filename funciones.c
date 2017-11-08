@@ -50,6 +50,7 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 		thread_data->elementosPorHebra = elementosPorHebra;
 		thread_data->coordenadas=(coordenada*)malloc(sizeof(char)*elementosPorHebra);
 		thread_data->mutexHilo = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t)*elementosPorHebra);
+		thread_data->matrixSize = N;
 
 		//printf("Hebra %d \n",(int)thread_data->tid );
 		//printf("elementosPorHebra dentro del while %d\n", elementosPorHebra);
@@ -60,7 +61,7 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 			{
 				thread_data->coordenadas[j].posX=fila;
 				thread_data->coordenadas[j].posY=columna;
-				//printf("%d) posX: %d posY: %d\n",j,thread_data->coordenadas[j].posX,thread_data->coordenadas[j].posY);
+				printf("%d) posX: %d posY: %d\n",j,thread_data->coordenadas[j].posX,thread_data->coordenadas[j].posY);
 				columna++;
 			}
 			else{
@@ -109,27 +110,11 @@ float **generateMatrix(int N)
 	return Hnew;
 }
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
-float schrodEqOLD(float **H, int x, int y,int N)
-{
-	//float **Hnew = generateMatrix();
-	float aux = (c)/(dt/dd);
-	aux = aux*aux;
-	//printf("%f\n", aux);
-	float value = 2*H[x][y]-H[x][y]+aux*(H[x+1][y]+H[x-1][y]+H[x][y-1]-4*H[x][y+1]);
-	//printf("%f\n", a);
-	
-	//Hnew[x][y] = a;
-
-	return value;
-}
 
 //DESCRIPCION:
 //ENTRADA:
 //SALIDA:
-float schrodEq(float **H, int x, int y, int N)
+float schrodEq(int x, int y, int N)
 {
 	float aux = (c)/(dt/dd);
 	aux = aux*aux;
@@ -157,11 +142,24 @@ float schrodEq(float **H, int x, int y, int N)
 void *applySchrod(void *arg1)
 {
 	hebra *thread_data = (hebra *) arg1;
-	//float value = schrodEq(Hold, x, y, N);
-	float value = 5;
-	//Hnew[x][y] = value;
 
-	printf("Soy la hebra %i\n", (int) thread_data->tid);
+	printf("Soy la hebra %i", (int) thread_data->tid);
+	printf(", tengo %i coordenadas\n", thread_data->elementosPorHebra);
+
+	int i = 0;
+	while(i<thread_data->elementosPorHebra)
+	{
+		int x = thread_data->coordenadas[i].posX;
+		int y = thread_data->coordenadas[i].posY;
+		int size = thread_data->matrixSize;
+		float value = schrodEq(x, y, size);
+		value = 5;
+		Hnext[x][y] = value;
+		
+		i++;
+	}
+
+	
 }
 
 //DESCRIPCION:
@@ -193,7 +191,7 @@ float **advance(float **H, int x, int y, int n, int N)
 	int count = 0; // contador
 	for (i; i < N; ++i){
 		for (j; j < N; ++j){
-			float value = schrodEq(H, x, y, N);
+			float value = schrodEq(x, y, N);
 			value = 5;
 			//if (i==0 || j==0 || i==N-1 || j==N-1) value = 0;
         	Hnew[i][j] = value;

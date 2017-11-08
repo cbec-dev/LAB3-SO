@@ -61,7 +61,8 @@ int main(int argc, char **argv)
 
 	srand((unsigned)time(NULL));		//seed para usar rand aleatorio
 
-	H = generateMatrix(N);	// Matriz en instante 0
+	H = generateMatrix(N);	// Matriz en instante t
+	Hnext = generateMatrix(N);	// Matriz en instante t+1
 
 	pthread_t threads[numeroHebras];
 
@@ -77,7 +78,8 @@ int main(int argc, char **argv)
 
 	printMatrix(H, N);
 	//float **Hnew = applyWave(H, iteraciones, N);		//Matriz en instante t
-	//printMatrix(Hnew, N);
+	printf("----------------------------------------\n");
+	printMatrix(Hnext, N);
 	//fprintMatrix(Hnew, "out.raw", N);
 
 	return 0;
