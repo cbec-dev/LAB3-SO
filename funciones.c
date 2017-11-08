@@ -38,11 +38,11 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 		elementosUltimaHebra = elementosPorHebra + cantidadElementos%numeroHebras;
 	}
 	int fila=0;
-
+	int columna=0;
 	//ASIGNAR LAS CASILLAS A LAS HEBRAS
 	while(i < numeroHebras)
 	{
-		int columna=0;
+		
 		hebra *thread_data;
 		thread_data = malloc(sizeof(hebra));
 		thread_data->tid = i;
@@ -66,18 +66,12 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N)
 			}
 			else{
 				columna=0;
+				j--;
 				fila++;
 			}
 		}
 		thread_data->mutexHilo = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t)*elementosPorHebra);
 		threads_data[i]=thread_data;
-		i++;
-	}
-
-	i = 0;
-	while(i<numeroHebras)
-	{
-		//pthread_create(&threads[i], NULL, applyWave, (void *) threads_data[i]);
 		i++;
 	}
 
@@ -125,14 +119,34 @@ float schrodEq(int x, int y, int N)
 	float right = 0;
 
 	if(x!=0)	upper = H[x-1][y];
-	if(x!=N)	lower = H[x+1][y];
+	if(x!=N-1)	lower = H[x+1][y];
 	if(y!=0)	left = H[x][y-1];
-	if(y!=N)	right = H[x][y+1];
+	if(y!=N-1)	right = H[x][y+1];
 
 	float value = 2*H[x][y]-H[x][y]+aux*(lower+upper+left-4*right);
+	//float value = 5;
 
 
 	return value;
+}
+
+void enterSC(int x, int y, int N)
+{
+
+	if(x!=0)	while (pthread_mutex_trylock(&mutex[x-1][y])!=0);
+	if(y!=0)	while (pthread_mutex_trylock(&mutex[x][y-1])!=0);
+				while (pthread_mutex_trylock(&mutex[x][y])!=0);
+	if(y!=N-1)	while (pthread_mutex_trylock(&mutex[x][y+1])!=0);
+	if(x!=N-1)	while (pthread_mutex_trylock(&mutex[x+1][y])!=0);
+}
+
+void exitSC(int x, int y, int N)
+{
+	if(x!=0)	while (pthread_mutex_unlock(&mutex[x-1][y])!=0);
+	if(y!=0)	while (pthread_mutex_unlock(&mutex[x][y-1])!=0);
+				while (pthread_mutex_unlock(&mutex[x][y])!=0);
+	if(y!=N-1)	while (pthread_mutex_unlock(&mutex[x][y+1])!=0);
+	if(x!=N-1)	while (pthread_mutex_unlock(&mutex[x+1][y])!=0);
 }
 
 //DESCRIPCION:
@@ -151,11 +165,15 @@ void *applySchrod(void *arg1)
 	{
 		int x = thread_data->coordenadas[i].posX;
 		int y = thread_data->coordenadas[i].posY;
-		int size = thread_data->matrixSize;
-		float value = schrodEq(x, y, size);
-		value = 5;
-		Hnext[x][y] = value;
-		
+		int N = thread_data->matrixSize;
+		printf("hebra: %i x: %i, y: %i\n",(int) thread_data->tid,x,y);
+
+		enterSC(x, y, N);
+		//SC
+		float value = schrodEq(x, y, N);
+		H[x][y] = value;
+		//FIN SC
+		exitSC(x, y, N);
 		i++;
 	}
 

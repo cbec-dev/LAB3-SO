@@ -38,3 +38,5 @@ void fprintMatrix(float **H,char *salida, int N);
 void waitHebras(pthread_t threads[], int numeroHebras);
 void getNextMatrix(pthread_t threads[], hebra **threads_data, float **Hprev, int numeroHebras, int N);
 void *applySchrod(void *arg);
+void enterSC(int x, int y, int N);
+void exitSC(int x, int y, int N);

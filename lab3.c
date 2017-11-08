@@ -19,8 +19,8 @@ int main(int argc, char **argv)
 	char *nameArchivo = NULL;
 	int N = 0;
 	int numeroHebras=0;
-	int numeroPasos=0;
-	int iteraciones=0;
+	int t=0;
+	int T=0;
 	int d;
 
 
@@ -34,10 +34,10 @@ int main(int argc, char **argv)
 				N = atoi(optarg);
 				break;
 			case 't':
-				iteraciones = atoi(optarg);
+				t = atoi(optarg);
 				break;
 			case 'T':
-				numeroPasos = atoi(optarg);
+				T = atoi(optarg);
 				break;
 			case 'H':
 				numeroHebras = atoi(optarg);
@@ -66,21 +66,23 @@ int main(int argc, char **argv)
 
 	pthread_t threads[numeroHebras];
 
-	crearHebras(threads, numeroHebras, H, N);
 
 
+	int tActual = 0;
+	while(tActual<t)
+	{
+		crearHebras(threads, numeroHebras, H, N);
 
+		//El hilo main espera que terminen las hebras
+		waitHebras(threads, numeroHebras);
 
-	//El hilo main espera que terminen las hebras
-	waitHebras(threads, numeroHebras);
-
-
+		printMatrix(H, N);
+	
+		tActual++;
+	}
 
 	printMatrix(H, N);
-	//float **Hnew = applyWave(H, iteraciones, N);		//Matriz en instante t
-	printf("----------------------------------------\n");
-	printMatrix(Hnext, N);
-	//fprintMatrix(Hnew, "out.raw", N);
+	fprintMatrix(H, "out.raw", N);
 
 	return 0;
 
