@@ -110,17 +110,17 @@ float **generateMatrix(int N)
 float schrodEq(int x, int y, int N, int t)
 {
 	
-	
 	float lower = 0;
 	float upper = 0;
 	float left = 0;
 	float right = 0;
 	float value = 0;
 
-	if(x!=0)	upper = H[x-1][y];
-	if(x!=N-1)	lower = H[x+1][y];
-	if(y!=0)	left = H[x][y-1];
-	if(y!=N-1)	right = H[x][y+1];
+	if(x!=0)	upper = H_t_1[x-1][y];
+	if(x!=N-1)	lower = H_t_1[x+1][y];
+	if(y!=0)	left = H_t_1[x][y-1];
+	if(y!=N-1)	right = H_t_1[x][y+1];
+
 
 
 	if (t==0)
@@ -128,11 +128,12 @@ float schrodEq(int x, int y, int N, int t)
 		if(x==0 || x== N-1 || y==0 || y==N-1)
 		{
 			value = 0;
+
 		}
 		else
 		{
 			float aux = ((c*c)/2)*(dt/dd)*(dt/dd);
-			value = H_t_1[x][y]+aux*(lower+upper+left-4*right);
+			value = H_t_1[x][y]+aux*(right+lower+upper+left-4*H_t_1[x][y]);
 		}
 	}
 	else
@@ -143,9 +144,9 @@ float schrodEq(int x, int y, int N, int t)
 		}
 		else
 		{
-			float aux = (c)/(dt/dd);
+			float aux = (c)*(dt/dd);
 			aux = aux*aux;
-			value = 2*H[x][y]-H_t_2[x][y]+aux*(lower+upper+left-4*right);
+			value = 2*H_t_1[x][y]-H_t_2[x][y]+aux*(right+lower+upper+left-4*H_t_1[x][y]);
 		}
 	}
 	
@@ -202,6 +203,7 @@ void *applySchrod(void *arg1)
 		exitSC(x, y, N);
 		i++;
 	}
+	printf("termine de modificar\n");
 
 	
 }
@@ -217,6 +219,7 @@ void getNextMatrix(pthread_t threads[], hebra **threads_data, float **Hprev, int
 	{
 		pthread_create(&threads[i], NULL, applySchrod, (void *) threads_data[i]);
 		i++;
+		printf("termino la hebra\n");
 	}
 
 

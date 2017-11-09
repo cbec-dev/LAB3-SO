@@ -62,6 +62,7 @@ int main(int argc, char **argv)
 	srand((unsigned)time(NULL));		//seed para usar rand aleatorio
 
 	H = generateMatrix(N);	// Matriz en instante t
+
 	H_t_2 = generateMatrix(N);
 	H_t_1 = generateMatrix(N);
 
@@ -75,7 +76,6 @@ int main(int argc, char **argv)
 	while(tActual<T)
 	{
 
-
 		crearHebras(threads, numeroHebras, H, N, tActual);
 
 		//El hilo main espera que terminen las hebras
@@ -86,12 +86,12 @@ int main(int argc, char **argv)
 
 		if(tActual==t)	fprintMatrix(H, "out.raw", N);
 
-	//	printMatrix(H, N);
+		printMatrix(H, N);
 	
 		tActual++;
 	}
 
-	printMatrix(H, N);
+	//printMatrix(H, N);
 
 	return 0;
 
