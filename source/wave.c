@@ -68,30 +68,34 @@ int main(int argc, char **argv)
 
 	pthread_t threads[numeroHebras];
 
-
-	printMatrix(H, N);
 	int tActual = 0;
 	H_t_1 = H;
 	H_t_2 = H;
-	while(tActual<T)
+	if (t<=T)
 	{
+		while(tActual<T)
+		{
+			crearHebras(threads, numeroHebras, H, N, tActual);
+			//El hilo main espera que terminen las hebras
+			waitHebras(threads, numeroHebras);
+			H_t_2 = H_t_1;
+			H_t_1 = H;
+			if(tActual==t)	fprintMatrix(H, "out.raw", N);
+			tActual++;
+		}
 
-		crearHebras(threads, numeroHebras, H, N, tActual);
-
-		//El hilo main espera que terminen las hebras
-		waitHebras(threads, numeroHebras);
-
-		H_t_2 = H_t_1;
-		H_t_1 = H;
-
-		if(tActual==t)	fprintMatrix(H, "out.raw", N);
-
+		printf("Matriz final con T (%d) iteraciones\n",T );
 		printMatrix(H, N);
-	
-		tActual++;
 	}
 
-	//printMatrix(H, N);
+	else
+	{
+		printf("WARNING! : EL numero de iteraciones de corte es menor que la cantidad de iteraciones disponibles\n");
+	}
+
+
+	
+
 
 	return 0;
 

@@ -1,8 +1,7 @@
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
-
+//DESCRIPCION: Función que se encarga de la creación y la inicializacion de las hebras asignando las casillas en las que realizan la funcion
+//ENTRADA: una lista con las hebras que inicializar, el numero de hebras, la matriz en la que se trabajará, el tamano de la matriz y la cantidad de iteraciones de corte
+//SALIDA: no posee retorno
 void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N, int t)
 {
 	
@@ -75,9 +74,9 @@ void crearHebras(pthread_t threads[], int numeroHebras, float **H, int N, int t)
 	getNextMatrix(threads, threads_data,H, numeroHebras, N);
 }
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
+//DESCRIPCION: funcion que genera la matriz con las condiciones de borde iniciales
+//ENTRADA: EL tamano de que debe poseer la matriz cuadrada
+//SALIDA: una matriz de flotantes con las condiciones iniciales
 float **generateMatrix(int N)
 {
 
@@ -104,9 +103,9 @@ float **generateMatrix(int N)
 }
 
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
+//DESCRIPCION: funcion que se encarga de encontrar el valor a una casilla dentro de la matriz para cualquier iteracion
+//ENTRADA: la pos x de la casilla, la posy de la casilla , el tamano de la matriz, la iteracion que se esta realizando
+//SALIDA: retorna un flotante con el valor posicionado en la casilla
 float schrodEq(int x, int y, int N, int t)
 {
 	
@@ -156,6 +155,9 @@ float schrodEq(int x, int y, int N, int t)
 	return value;
 }
 
+//DESCRIPCION: funcion que permite entrar a la seccion critica bloqueando las casillas que son necesarias para realizar los calculos
+//ENTRADA: la pos x de la casilla central a bloquear, la posy de la casilla central a bloquear y el tamano de la matriz a considerar
+//SALIDA: no posee retorno
 void enterSC(int x, int y, int N)
 {
 
@@ -166,6 +168,9 @@ void enterSC(int x, int y, int N)
 	if(x!=N-1)	while (pthread_mutex_trylock(&mutex[x+1][y])!=0);
 }
 
+//DESCRIPCION: funcion que libera las casillas bloqueadas de la seccion critica
+//ENTRADA: la pos x de la casilla central a desbloquear, la posy de la casilla central a desbloquear y el tamano de la matriz a considerar
+//SALIDA: no posee retorno
 void exitSC(int x, int y, int N)
 {
 	if(x!=0)	while (pthread_mutex_unlock(&mutex[x-1][y])!=0);
@@ -175,12 +180,13 @@ void exitSC(int x, int y, int N)
 	if(x!=N-1)	while (pthread_mutex_unlock(&mutex[x+1][y])!=0);
 }
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
-//void applySchrod(int x, int y, float **Hold, float **Hnew, int N)
+//DESCRIPCION: funcion principal que aplica el algoritmo a las hebras
+//ENTRADA: los argumentos provenientes de la creacion de hebras
+//SALIDA: no posee retorno
+
 void *applySchrod(void *arg1)
 {
+	
 	hebra *thread_data = (hebra *) arg1;
 
 //	printf("Soy la hebra %i", (int) thread_data->tid);
@@ -203,14 +209,13 @@ void *applySchrod(void *arg1)
 		exitSC(x, y, N);
 		i++;
 	}
-	printf("termine de modificar\n");
 
 	
 }
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
+//DESCRIPCION: funcion que genera la siguiente matriz calculando los valores asignados a las casillas para cada hebra
+//ENTRADA: las hebras a ejecutar, la matriz previa , la cantidad de herbas y el tamano de la matriz
+//SALIDA: no posee retorno
 void getNextMatrix(pthread_t threads[], hebra **threads_data, float **Hprev, int numeroHebras, int N)
 {
 	float **Hnext;
@@ -219,15 +224,14 @@ void getNextMatrix(pthread_t threads[], hebra **threads_data, float **Hprev, int
 	{
 		pthread_create(&threads[i], NULL, applySchrod, (void *) threads_data[i]);
 		i++;
-		printf("termino la hebra\n");
 	}
 
 
 }
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
+//DESCRIPCION: funcion que muestra por consola una matriz
+//ENTRADA: la matriz a mostrar por consola y la dimension que esta posee
+//SALIDA: no posee retorno
 void printMatrix(float **H,int N)
 {
 	int i,j;
@@ -239,14 +243,16 @@ void printMatrix(float **H,int N)
 	}
 }
 
-//DESCRIPCION:
-//ENTRADA:
-//SALIDA:
+//DESCRIPCION: funcion que escribe en un archivo de texto una matriz
+//ENTRADA: la amtriz a escribir, el nombre del archivo de salida y la dimension que esta posee
+//SALIDA: no posee retorno
 void fprintMatrix(float **H,char *salida, int N){
 	int i,j;
 	if (salida !=NULL){
+		printf("voy a escribir archivo de salida\n");
 		FILE *archivoSalida;
 		archivoSalida=fopen(salida,"wb");
+		printf("voy a escribir archivo de salida2\n");
 		for (i = 0; i < N; ++i){
 			fwrite(H[i],N,sizeof(float),archivoSalida);
 		}
